@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.3] - 2026-06-24
+
+### Changed
+- Removed 170 Microsoft Teams thread ID records (19:GUID@thread.v2 entries stored as contact names), 20,489 → 20,319 contacts
+
 ## [1.0.2] - 2026-06-24
 
 ### Changed
