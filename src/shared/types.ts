@@ -22,6 +22,26 @@ export interface Contact {
   favorite: number;
   created_at: string;
   updated_at: string;
+  // Extended fields from Outlook contact exports (optional).
+  title_prefix?: string;
+  suffix?: string;
+  department?: string;
+  home_street?: string;
+  home_city?: string;
+  home_state?: string;
+  home_zip?: string;
+  home_country?: string;
+  birthday?: string;
+  anniversary?: string;
+  spouse?: string;
+  children?: string;
+  hobby?: string;
+  gender?: string;
+  assistant_name?: string;
+  user_1?: string;
+  user_2?: string;
+  user_3?: string;
+  user_4?: string;
 }
 
 export type NewContact = Partial<Contact>;
@@ -116,6 +136,25 @@ export function emptyContact(): Contact {
     tags: '',
     favorite: 0,
     created_at: now,
-    updated_at: now
+    updated_at: now,
+    title_prefix: '',
+    suffix: '',
+    department: '',
+    home_street: '',
+    home_city: '',
+    home_state: '',
+    home_zip: '',
+    home_country: '',
+    birthday: '',
+    anniversary: '',
+    spouse: '',
+    children: '',
+    hobby: '',
+    gender: '',
+    assistant_name: '',
+    user_1: '',
+    user_2: '',
+    user_3: '',
+    user_4: ''
   };
 }

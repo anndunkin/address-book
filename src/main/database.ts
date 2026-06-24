@@ -25,7 +25,26 @@ CREATE TABLE IF NOT EXISTS contacts (
   tags TEXT DEFAULT '',
   favorite INTEGER DEFAULT 0,
   created_at TEXT DEFAULT '',
-  updated_at TEXT DEFAULT ''
+  updated_at TEXT DEFAULT '',
+  title_prefix TEXT DEFAULT '',
+  suffix TEXT DEFAULT '',
+  department TEXT DEFAULT '',
+  home_street TEXT DEFAULT '',
+  home_city TEXT DEFAULT '',
+  home_state TEXT DEFAULT '',
+  home_zip TEXT DEFAULT '',
+  home_country TEXT DEFAULT '',
+  birthday TEXT DEFAULT '',
+  anniversary TEXT DEFAULT '',
+  spouse TEXT DEFAULT '',
+  children TEXT DEFAULT '',
+  hobby TEXT DEFAULT '',
+  gender TEXT DEFAULT '',
+  assistant_name TEXT DEFAULT '',
+  user_1 TEXT DEFAULT '',
+  user_2 TEXT DEFAULT '',
+  user_3 TEXT DEFAULT '',
+  user_4 TEXT DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS import_log (
@@ -40,12 +59,22 @@ CREATE INDEX IF NOT EXISTS idx_contacts_name ON contacts(last_name, first_name);
 CREATE INDEX IF NOT EXISTS idx_contacts_email ON contacts(email_1);
 `;
 
+// Extended fields added for Outlook contact exports. Kept separate so the
+// migration can add them to pre-existing databases.
+const EXTENDED_COLUMNS: (keyof Contact)[] = [
+  'title_prefix', 'suffix', 'department', 'home_street', 'home_city',
+  'home_state', 'home_zip', 'home_country', 'birthday', 'anniversary',
+  'spouse', 'children', 'hobby', 'gender', 'assistant_name',
+  'user_1', 'user_2', 'user_3', 'user_4'
+];
+
 const COLUMNS: (keyof Contact)[] = [
   'first_name', 'last_name', 'company', 'title', 'email_1', 'email_2',
   'phone_mobile', 'phone_work', 'phone_home', 'address_street', 'address_city',
   'address_state', 'address_zip', 'address_country', 'linkedin_url',
   'linkedin_last_updated', 'website', 'notes', 'tags', 'favorite',
-  'created_at', 'updated_at'
+  'created_at', 'updated_at',
+  ...EXTENDED_COLUMNS
 ];
 
 export class ContactDatabase {
@@ -55,6 +84,21 @@ export class ContactDatabase {
     this.db = new Database(filePath);
     this.db.pragma('journal_mode = WAL');
     this.db.exec(SCHEMA);
+    this.migrate();
+  }
+
+  /** Add any extended columns missing from a pre-existing database. */
+  private migrate(): void {
+    const existing = new Set(
+      (this.db.prepare('PRAGMA table_info(contacts)').all() as { name: string }[]).map(
+        (c) => c.name
+      )
+    );
+    for (const col of EXTENDED_COLUMNS) {
+      if (!existing.has(col as string)) {
+        this.db.exec(`ALTER TABLE contacts ADD COLUMN ${col} TEXT DEFAULT ''`);
+      }
+    }
   }
 
   close(): void {
