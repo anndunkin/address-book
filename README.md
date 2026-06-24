@@ -41,7 +41,9 @@ A personal address book desktop application for Windows, built with **Electron +
 ### Data file location
 
 - Database: `Documents/AddressBook/addressbook.db` (configurable via **File → Open Database** / Settings).
-- The installer bundles `data/sample-contacts.json` and copies it to `Documents/AddressBook/` on first run; it seeds the database if it's empty.
+- `data/master-contacts.json` is the **full contact database** (11,352 consolidated contacts from 5 source files). It is bundled with the installer and seeded into the database on first launch.
+- `data/sample-contacts.json` holds the first 10 records of the master database for a lightweight seed/demo experience.
+- The installer copies these data files to `Documents/AddressBook/` on first run; the database is seeded if it's empty.
 
 ## Development
 
@@ -63,7 +65,8 @@ address-book/
 │   ├── renderer/    # React UI (App + components + styles)
 │   └── shared/      # types, IPC channel names, import parsers, exporters
 ├── data/
-│   └── sample-contacts.json   # seed data, bundled into the installer
+│   ├── master-contacts.json   # full contact database (11,352 contacts), bundled & seeded
+│   └── sample-contacts.json   # first 10 records for a lightweight seed/demo
 ├── tests/           # Jest tests (parsers, duplicates, CRUD, components)
 ├── assets/          # generated app icon
 ├── electron-builder.yml
