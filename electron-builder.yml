@@ -20,7 +20,9 @@ extraResources:
       - "**/*"
 
 win:
-  target: nsis
+  target:
+    - nsis
+    - zip
   icon: assets/icon.ico
 
 nsis:
