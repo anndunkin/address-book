@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.1] - 2026-06-24
+
+### Changed
+- Bulk data cleanup applied to master contacts (20,713 → 20,660 records):
+  - Removed 9 email addresses containing "unsubscribe" or "removeme"
+  - Removed 44 entries from the followup.cc domain
+  - Dropped 53 records that became empty after email cleanup
+  - Assigned names to EPA contacts using lastname.firstname@epa.gov format (3 records)
+  - Inferred first/last names from dotted/underscore email addresses (225 records)
+  - Best-effort name parsing for single-token email local parts (383 records — flagged for review in notes field)
+
 ## [1.0.0] - 2026-06-24
 
 ### Added

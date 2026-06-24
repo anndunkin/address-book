@@ -1,6 +1,6 @@
 {
   "name": "address-book",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Address Book desktop application — Electron + React + SQLite with multi-format import and LinkedIn integration",
   "author": "anndunkin",
   "license": "MIT",
