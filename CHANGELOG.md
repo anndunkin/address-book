@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.2] - 2026-06-24
+
+### Changed
+- Second bulk data cleanup pass (20,660 → 20,489 records, 171 deleted):
+  - Removed 61 Microsoft Teams chat ID records (unq.gbl.spaces GUIDs stored as names)
+  - Removed 6 Microsoft Teams visitor/org ID records (8:orgid: entries)
+  - Removed 94 HP/HPE service and infrastructure accounts (disabled accounts, mailfc-service, om/vcd/gen subdomains, system accounts)
+  - Removed 5 lb.bcentral.com return-path tracking addresses
+  - Removed 3 followup.cc variant addresses (typos: .ccom, .ccc, .c)
+  - Removed 2 info@ addresses with no real name
+
 ## [1.0.1] - 2026-06-24
 
 ### Changed
