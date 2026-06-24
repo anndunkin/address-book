@@ -24,8 +24,15 @@ export const IPC = {
   LINKEDIN_UPDATE_ALL: 'linkedin:updateAll',
   LINKEDIN_CONNECT: 'linkedin:connect',
   // menu -> renderer events
-  MENU_EVENT: 'menu:event'
+  MENU_EVENT: 'menu:event',
+  // first-launch seeding progress -> renderer
+  SEED_PROGRESS: 'seed:progress'
 } as const;
+
+export interface SeedProgress {
+  phase: 'start' | 'done';
+  total: number;
+}
 
 export type MenuEvent =
   | 'add-contact'

@@ -102,6 +102,61 @@ export function ContactDetail({
         <Row label="Tags" value={contact.tags} />
         <Row label="Notes" value={contact.notes} />
       </div>
+
+      <Section title="Personal" contact={contact} fields={PERSONAL_FIELDS} />
+      <Section title="Home Address" contact={contact} fields={HOME_FIELDS} />
+      <Section title="Additional" contact={contact} fields={ADDITIONAL_FIELDS} />
+    </div>
+  );
+}
+
+type FieldDef = { key: keyof Contact; label: string };
+
+const PERSONAL_FIELDS: FieldDef[] = [
+  { key: 'birthday', label: 'Birthday' },
+  { key: 'anniversary', label: 'Anniversary' },
+  { key: 'spouse', label: 'Spouse' },
+  { key: 'children', label: 'Children' },
+  { key: 'hobby', label: 'Hobby' },
+  { key: 'gender', label: 'Gender' }
+];
+
+const HOME_FIELDS: FieldDef[] = [
+  { key: 'home_street', label: 'Street' },
+  { key: 'home_city', label: 'City' },
+  { key: 'home_state', label: 'State' },
+  { key: 'home_zip', label: 'ZIP' },
+  { key: 'home_country', label: 'Country' }
+];
+
+const ADDITIONAL_FIELDS: FieldDef[] = [
+  { key: 'department', label: 'Department' },
+  { key: 'assistant_name', label: 'Assistant' },
+  { key: 'user_1', label: 'Custom 1' },
+  { key: 'user_2', label: 'Custom 2' },
+  { key: 'user_3', label: 'Custom 3' },
+  { key: 'user_4', label: 'Custom 4' }
+];
+
+function Section({
+  title,
+  contact,
+  fields
+}: {
+  title: string;
+  contact: Contact;
+  fields: FieldDef[];
+}): JSX.Element | null {
+  const present = fields.filter((f) => contact[f.key]);
+  if (!present.length) return null;
+  return (
+    <div className="detail-section">
+      <h3>{title}</h3>
+      <div className="field-grid">
+        {present.map((f) => (
+          <Row key={f.key} label={f.label} value={String(contact[f.key] ?? '')} />
+        ))}
+      </div>
     </div>
   );
 }

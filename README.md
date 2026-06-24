@@ -2,6 +2,8 @@
 
 A personal address book desktop application for Windows, built with **Electron + React + TypeScript + SQLite**. It ingests contacts from multiple file formats, consolidates them into a single portable SQLite database, and includes a scaffolded LinkedIn integration for keeping contact details current.
 
+> **v1.0.0 (first release) ships pre-loaded with 20,713 contacts**, seeded into your database on first launch (you'll see a "Loading your contacts…" splash while it imports — this happens only once). **Future releases will NOT bundle a data file** — you'll start empty and import your own contacts.
+
 ![Address Book](assets/icon.png)
 
 ## Features
@@ -27,7 +29,7 @@ A personal address book desktop application for Windows, built with **Electron +
 
 1. Download the latest `Address Book Setup x.y.z.exe` from the Releases page.
 2. Run the installer. You can choose the install directory; Desktop and Start Menu shortcuts are created.
-3. On first launch, choose **Create New Database** (recommended) — it will be created in `Documents/AddressBook/addressbook.db` and seeded with sample contacts.
+3. On first launch, choose **Create New Database** (recommended) — it will be created in `Documents/AddressBook/addressbook.db`. In v1.0.0 it is pre-loaded with 20,713 contacts (a one-time "Loading your contacts…" splash appears while they import).
 
 ## Usage
 
@@ -41,9 +43,28 @@ A personal address book desktop application for Windows, built with **Electron +
 ### Data file location
 
 - Database: `Documents/AddressBook/addressbook.db` (configurable via **File → Open Database** / Settings).
-- `data/master-contacts.json` is the **full contact database** (11,352 consolidated contacts from 5 source files). It is bundled with the installer and seeded into the database on first launch.
-- `data/sample-contacts.json` holds the first 10 records of the master database for a lightweight seed/demo experience.
-- The installer copies these data files to `Documents/AddressBook/` on first run; the database is seeded if it's empty.
+- `data/master-contacts.json` is the **full contact database** (20,713 consolidated contacts). It is bundled with the **v1.0.0 installer only** and seeded into the database on first launch when the database is new/empty. Seeding runs once; on later launches your existing data is never overwritten. After the first-launch seed the bundled file is no longer needed by the running app.
+- **Future releases will not include a data file.** Users start with an empty database and import their own contacts via **File → Import**.
+- The portable `.db` lives in `Documents/AddressBook`, outside the app bundle, so you can back it up, move it, or share it.
+
+### Supported contact fields
+
+Each contact supports the following fields:
+
+- **Name & identity**: first name, last name, title prefix, suffix, company, department, job title
+- **Email**: primary email, secondary email
+- **Phone**: mobile, work, home
+- **Work address**: street, city, state, ZIP, country
+- **Home address**: street, city, state, ZIP, country
+- **Web**: website, LinkedIn URL (with a "last updated" stamp)
+- **Personal**: birthday, anniversary, spouse, children, hobby, gender
+- **Other**: assistant name, tags, notes, favorite flag, and four free-form custom fields (user 1–4)
+
+### LinkedIn integration
+
+- **Update Selected Contact** opens the contact's LinkedIn profile (or a name/company search if no URL is set) in your browser and stamps a "last updated" date.
+- **Update All Contacts** batch-processes everyone who has a LinkedIn URL.
+- Add a **LinkedIn Client ID** in **Settings** to enable the OAuth `Connect` entry point.
 
 ## Development
 
@@ -61,12 +82,12 @@ npm run dist           # build + produce the Windows NSIS installer (run on Wind
 ```
 address-book/
 ├── src/
-│   ├── main/        # Electron main process (index, database, ipc-handlers, menu, linkedin, preload, settings)
+│   ├── main/        # Electron main process (index, database, seed, ipc-handlers, menu, linkedin, preload, settings)
 │   ├── renderer/    # React UI (App + components + styles)
 │   └── shared/      # types, IPC channel names, import parsers, exporters
 ├── data/
-│   ├── master-contacts.json   # full contact database (11,352 contacts), bundled & seeded
-│   └── sample-contacts.json   # first 10 records for a lightweight seed/demo
+│   ├── master-contacts.json   # full contact database (20,713 contacts), bundled & seeded — v1.0.0 only
+│   └── sample-contacts.json   # first 10 records for a lightweight demo
 ├── tests/           # Jest tests (parsers, duplicates, CRUD, components)
 ├── assets/          # generated app icon
 ├── electron-builder.yml

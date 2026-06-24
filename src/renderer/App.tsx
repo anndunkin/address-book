@@ -39,6 +39,7 @@ export function App(): JSX.Element {
   const [showMapper, setShowMapper] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [message, setMessage] = useState<{ title: string; body: string } | null>(null);
+  const [seeding, setSeeding] = useState<{ total: number } | null>(null);
 
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -266,6 +267,18 @@ export function App(): JSX.Element {
     return off;
   }, [handleMenu]);
 
+  useEffect(() => {
+    const off = window.addressBook.onSeedProgress((progress) => {
+      if (progress.phase === 'start') {
+        setSeeding({ total: progress.total });
+      } else {
+        setSeeding(null);
+        void refresh();
+      }
+    });
+    return off;
+  }, [refresh]);
+
   const saveContact = async (data: NewContact) => {
     if (editing && editing.id) {
       await window.addressBook.updateContact(editing.id, data);
@@ -280,6 +293,15 @@ export function App(): JSX.Element {
 
   return (
     <div className="app">
+      {seeding && (
+        <div className="seed-splash">
+          <div className="spinner" />
+          <h2>Loading your contacts…</h2>
+          <p style={{ color: 'var(--muted)' }}>
+            Importing {seeding.total.toLocaleString()} contacts. This only happens once.
+          </p>
+        </div>
+      )}
       <div className="toolbar">
         <SearchBar value={search} onChange={setSearch} inputRef={searchRef} />
         <button

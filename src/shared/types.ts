@@ -109,7 +109,26 @@ export const CONTACT_FIELDS: (keyof Contact)[] = [
   'linkedin_url',
   'website',
   'notes',
-  'tags'
+  'tags',
+  'title_prefix',
+  'suffix',
+  'department',
+  'home_street',
+  'home_city',
+  'home_state',
+  'home_zip',
+  'home_country',
+  'birthday',
+  'anniversary',
+  'spouse',
+  'children',
+  'hobby',
+  'gender',
+  'assistant_name',
+  'user_1',
+  'user_2',
+  'user_3',
+  'user_4'
 ];
 
 export function emptyContact(): Contact {

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { IPC, MenuEvent } from '../shared/ipc';
+import { IPC, MenuEvent, SeedProgress } from '../shared/ipc';
 import {
   Contact,
   NewContact,
@@ -71,6 +71,12 @@ const api = {
     const listener = (_e: unknown, evt: MenuEvent) => handler(evt);
     ipcRenderer.on(IPC.MENU_EVENT, listener);
     return () => ipcRenderer.removeListener(IPC.MENU_EVENT, listener);
+  },
+
+  onSeedProgress: (handler: (progress: SeedProgress) => void): (() => void) => {
+    const listener = (_e: unknown, progress: SeedProgress) => handler(progress);
+    ipcRenderer.on(IPC.SEED_PROGRESS, listener);
+    return () => ipcRenderer.removeListener(IPC.SEED_PROGRESS, listener);
   }
 };
 

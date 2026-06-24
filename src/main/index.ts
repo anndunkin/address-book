@@ -5,44 +5,51 @@ import { ContactDatabase } from './database';
 import { buildMenu, setWindowTitle } from './menu';
 import { getSettings, setDatabasePath } from './settings';
 import { registerIpcHandlers, getCurrentDb } from './ipc-handlers';
+import { loadSeedContacts } from './seed';
+import { IPC, SeedProgress } from '../shared/ipc';
 
 let mainWindow: BrowserWindow | null = null;
 
-/** Resolve the bundled sample seed file in both dev and packaged contexts. */
-function sampleSeedPath(): string {
+/**
+ * Resolve the bundled master seed file (the full contact database) in both dev
+ * and packaged contexts. This ships with v1.0.0 to pre-load contacts on first
+ * launch; once seeded into the user's database it is no longer needed.
+ */
+function masterSeedPath(): string {
   const candidates = [
-    path.join(process.resourcesPath || '', 'data', 'sample-contacts.json'),
-    path.join(app.getAppPath(), 'data', 'sample-contacts.json'),
-    path.join(__dirname, '..', '..', 'data', 'sample-contacts.json')
+    path.join(process.resourcesPath || '', 'data', 'master-contacts.json'),
+    path.join(app.getAppPath(), 'data', 'master-contacts.json'),
+    path.join(__dirname, '..', '..', 'data', 'master-contacts.json')
   ];
   return candidates.find((p) => fs.existsSync(p)) || candidates[candidates.length - 1];
 }
 
-/** Documents/AddressBook is where the portable .db and a copy of the seed live. */
+/** Documents/AddressBook is where the portable .db lives. */
 function documentsDir(): string {
   const dir = path.join(app.getPath('documents'), 'AddressBook');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
 
-function copySeedToDocuments(): string {
-  const dest = path.join(documentsDir(), 'sample-contacts.json');
-  const src = sampleSeedPath();
-  try {
-    if (fs.existsSync(src)) fs.copyFileSync(src, dest);
-  } catch {
-    /* non-fatal */
-  }
-  return dest;
+function sendSeedProgress(progress: SeedProgress): void {
+  mainWindow?.webContents.send(IPC.SEED_PROGRESS, progress);
 }
 
+/**
+ * Seed a brand-new database from the bundled master file. Runs only once: if the
+ * database already has contacts, this is a no-op so a user's data is never
+ * overwritten on subsequent launches.
+ */
 function seedDatabase(db: ContactDatabase): void {
   if (db.count() > 0) return;
-  const seed = sampleSeedPath();
+  const seed = masterSeedPath();
   if (!fs.existsSync(seed)) return;
   try {
-    const contacts = JSON.parse(fs.readFileSync(seed, 'utf-8'));
-    if (Array.isArray(contacts)) db.bulkCreate(contacts);
+    const contacts = loadSeedContacts(seed);
+    if (!contacts.length) return;
+    sendSeedProgress({ phase: 'start', total: contacts.length });
+    db.bulkCreate(contacts);
+    sendSeedProgress({ phase: 'done', total: contacts.length });
   } catch {
     /* ignore malformed seed */
   }
@@ -61,7 +68,6 @@ export function openDatabaseAt(filePath: string): void {
 
 async function firstLaunchFlow(): Promise<void> {
   const settings = getSettings();
-  copySeedToDocuments();
 
   if (settings.databasePath && fs.existsSync(settings.databasePath)) {
     openDatabaseAt(settings.databasePath);
@@ -76,7 +82,7 @@ async function firstLaunchFlow(): Promise<void> {
     cancelId: 0,
     title: 'Welcome to Address Book',
     message: 'No address book database is configured.',
-    detail: 'Create a new database (seeded with sample contacts) or open an existing .db file.'
+    detail: 'Create a new database (pre-loaded with the bundled contacts) or open an existing .db file.'
   });
 
   if (choice.response === 1) {

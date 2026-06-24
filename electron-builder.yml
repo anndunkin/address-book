@@ -9,6 +9,9 @@ directories:
 files:
   - dist/**/*
   - package.json
+  # DATA FILE NOTE: master-contacts.json is included in v1.0.0 (first release) only.
+  # Remove from the files array for all future releases — users manage their own data.
+  - data/master-contacts.json
 
 extraResources:
   - from: data

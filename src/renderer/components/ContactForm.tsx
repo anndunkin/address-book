@@ -26,7 +26,26 @@ const FIELDS: { key: keyof Contact; label: string; full?: boolean }[] = [
   { key: 'address_country', label: 'Country' },
   { key: 'linkedin_url', label: 'LinkedIn URL', full: true },
   { key: 'tags', label: 'Tags (comma separated)', full: true },
-  { key: 'notes', label: 'Notes', full: true }
+  { key: 'notes', label: 'Notes', full: true },
+  { key: 'title_prefix', label: 'Title Prefix' },
+  { key: 'suffix', label: 'Suffix' },
+  { key: 'department', label: 'Department' },
+  { key: 'home_street', label: 'Home Street', full: true },
+  { key: 'home_city', label: 'Home City' },
+  { key: 'home_state', label: 'Home State' },
+  { key: 'home_zip', label: 'Home ZIP' },
+  { key: 'home_country', label: 'Home Country' },
+  { key: 'birthday', label: 'Birthday' },
+  { key: 'anniversary', label: 'Anniversary' },
+  { key: 'spouse', label: 'Spouse' },
+  { key: 'children', label: 'Children' },
+  { key: 'hobby', label: 'Hobby' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'assistant_name', label: 'Assistant Name' },
+  { key: 'user_1', label: 'Custom Field 1' },
+  { key: 'user_2', label: 'Custom Field 2' },
+  { key: 'user_3', label: 'Custom Field 3' },
+  { key: 'user_4', label: 'Custom Field 4' }
 ];
 
 export function ContactForm({ initial, onSave, onCancel }: ContactFormProps): JSX.Element {
