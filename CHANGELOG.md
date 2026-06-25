@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.4] - 2026-06-24
+
+### Changed
+- Removed 22 Microsoft Teams visitor/org ID records (8:teamsvisitor: and 8:orgid: entries stored as contact names), 20,319 → 20,297 contacts
+
 ## [1.0.3] - 2026-06-24
 
 ### Changed
