@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5] - 2026-06-24
+
+### Changed
+- master-contacts.json no longer bundled with the installer (users manage their own data going forward)
+- First-launch experience now seeds from sample-contacts.json (10 demo contacts) instead of the full master database
+- Updated README to reflect user-managed data model
+
 ## [1.0.4] - 2026-06-24
 
 ### Changed

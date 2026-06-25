@@ -11,15 +11,19 @@ import { IPC, SeedProgress } from '../shared/ipc';
 let mainWindow: BrowserWindow | null = null;
 
 /**
- * Resolve the bundled master seed file (the full contact database) in both dev
- * and packaged contexts. This ships with v1.0.0 to pre-load contacts on first
- * launch; once seeded into the user's database it is no longer needed.
+ * Resolve the bundled sample seed file (10 demo contacts) in both dev and
+ * packaged contexts. Gives a brand-new database a small starter dataset on
+ * first launch; users import their own contacts via File → Import.
+ *
+ * Note: v1.0.0–v1.0.4 bundled the full master-contacts.json (~20k contacts) as
+ * a one-time first-launch seed. That file is no longer shipped — the app now
+ * seeds only the small sample dataset and users manage their own data.
  */
-function masterSeedPath(): string {
+function sampleSeedPath(): string {
   const candidates = [
-    path.join(process.resourcesPath || '', 'data', 'master-contacts.json'),
-    path.join(app.getAppPath(), 'data', 'master-contacts.json'),
-    path.join(__dirname, '..', '..', 'data', 'master-contacts.json')
+    path.join(process.resourcesPath || '', 'data', 'sample-contacts.json'),
+    path.join(app.getAppPath(), 'data', 'sample-contacts.json'),
+    path.join(__dirname, '..', '..', 'data', 'sample-contacts.json')
   ];
   return candidates.find((p) => fs.existsSync(p)) || candidates[candidates.length - 1];
 }
@@ -36,13 +40,13 @@ function sendSeedProgress(progress: SeedProgress): void {
 }
 
 /**
- * Seed a brand-new database from the bundled master file. Runs only once: if the
+ * Seed a brand-new database from the bundled sample file. Runs only once: if the
  * database already has contacts, this is a no-op so a user's data is never
  * overwritten on subsequent launches.
  */
 function seedDatabase(db: ContactDatabase): void {
   if (db.count() > 0) return;
-  const seed = masterSeedPath();
+  const seed = sampleSeedPath();
   if (!fs.existsSync(seed)) return;
   try {
     const contacts = loadSeedContacts(seed);

@@ -2,7 +2,7 @@
 
 A personal address book desktop application for Windows, built with **Electron + React + TypeScript + SQLite**. It ingests contacts from multiple file formats, consolidates them into a single portable SQLite database, and includes a scaffolded LinkedIn integration for keeping contact details current.
 
-> **v1.0.0 (first release) ships pre-loaded with 20,713 contacts**, seeded into your database on first launch (you'll see a "Loading your contacts…" splash while it imports — this happens only once). **Future releases will NOT bundle a data file** — you'll start empty and import your own contacts.
+> The app ships with a **small sample dataset** (10 demo contacts) seeded into your database on first launch so the UI isn't empty. You manage your own data: import your contacts via **File → Import**.
 
 ![Address Book](assets/icon.png)
 
@@ -29,7 +29,7 @@ A personal address book desktop application for Windows, built with **Electron +
 
 1. Download the latest `Address Book Setup x.y.z.exe` from the Releases page.
 2. Run the installer. You can choose the install directory; Desktop and Start Menu shortcuts are created.
-3. On first launch, choose **Create New Database** (recommended) — it will be created in `Documents/AddressBook/addressbook.db`. In v1.0.0 it is pre-loaded with 20,713 contacts (a one-time "Loading your contacts…" splash appears while they import).
+3. On first launch, choose **Create New Database** (recommended) — it will be created in `Documents/AddressBook/addressbook.db`, seeded with 10 sample contacts so the app isn't empty. Import your own contacts via **File → Import**.
 
 ## Usage
 
@@ -43,8 +43,8 @@ A personal address book desktop application for Windows, built with **Electron +
 ### Data file location
 
 - Database: `Documents/AddressBook/addressbook.db` (configurable via **File → Open Database** / Settings).
-- `data/master-contacts.json` is the **full contact database** (20,713 consolidated contacts). It is bundled with the **v1.0.0 installer only** and seeded into the database on first launch when the database is new/empty. Seeding runs once; on later launches your existing data is never overwritten. After the first-launch seed the bundled file is no longer needed by the running app.
-- **Future releases will not include a data file.** Users start with an empty database and import their own contacts via **File → Import**.
+- `data/sample-contacts.json` is a **small sample dataset** (10 demo contacts) bundled with the installer and seeded into the database on first launch when the database is new/empty. Seeding runs once; on later launches your existing data is never overwritten.
+- **The app does not bundle a full contact database.** Users start with the sample data and import their own contacts via **File → Import**. (v1.0.0–v1.0.4 bundled a ~20k-contact `master-contacts.json`; this is no longer shipped.)
 - The portable `.db` lives in `Documents/AddressBook`, outside the app bundle, so you can back it up, move it, or share it.
 
 ### Supported contact fields
@@ -86,8 +86,7 @@ address-book/
 │   ├── renderer/    # React UI (App + components + styles)
 │   └── shared/      # types, IPC channel names, import parsers, exporters
 ├── data/
-│   ├── master-contacts.json   # full contact database (20,713 contacts), bundled & seeded — v1.0.0 only
-│   └── sample-contacts.json   # first 10 records for a lightweight demo
+│   └── sample-contacts.json   # 10 demo contacts, bundled & seeded on first launch
 ├── tests/           # Jest tests (parsers, duplicates, CRUD, components)
 ├── assets/          # generated app icon
 ├── electron-builder.yml

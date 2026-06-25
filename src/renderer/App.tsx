@@ -296,9 +296,9 @@ export function App(): JSX.Element {
       {seeding && (
         <div className="seed-splash">
           <div className="spinner" />
-          <h2>Loading your contacts…</h2>
+          <h2>Setting up your address book…</h2>
           <p style={{ color: 'var(--muted)' }}>
-            Importing {seeding.total.toLocaleString()} contacts. This only happens once.
+            Adding {seeding.total.toLocaleString()} sample contacts. This only happens once.
           </p>
         </div>
       )}
