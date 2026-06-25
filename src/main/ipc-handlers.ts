@@ -61,6 +61,18 @@ export function registerIpcHandlers(
     requireDb().toggleFavorite(id)
   );
 
+  // --- merge ---
+  ipcMain.handle(IPC.CONTACTS_FIND_DUPLICATES, () => requireDb().findDuplicates());
+  ipcMain.handle(
+    IPC.CONTACT_MERGE,
+    (_e, primaryId: number, secondaryId: number, mergedData: NewContact) =>
+      requireDb().mergeContacts(primaryId, secondaryId, mergedData)
+  );
+  ipcMain.handle(IPC.CONTACT_UNDO_MERGE, (_e, mergeId: number) =>
+    requireDb().undoMerge(mergeId)
+  );
+  ipcMain.handle(IPC.MERGE_HISTORY, () => requireDb().getMergeHistory());
+
   // --- database ---
   ipcMain.handle(IPC.DB_INFO, () => ({
     path: holder.path,

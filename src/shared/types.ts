@@ -77,6 +77,23 @@ export interface ParsedImport {
 /** Maps a source column name to a Contact field key. */
 export type FieldMapping = Record<string, keyof Contact | ''>;
 
+export type MergeConfidence = 'high' | 'medium' | 'low';
+
+export interface DuplicateGroup {
+  confidence: MergeConfidence;
+  contacts: Contact[];
+  reason: string;
+}
+
+export interface MergeHistoryEntry {
+  id: number;
+  merged_at: string;
+  primary_id: number;
+  primary_before: Contact;
+  secondary_snapshot: Contact;
+  merged_result: Contact;
+}
+
 export interface AppSettings {
   databasePath: string | null;
   theme: 'light' | 'dark';
@@ -129,6 +146,47 @@ export const CONTACT_FIELDS: (keyof Contact)[] = [
   'user_2',
   'user_3',
   'user_4'
+];
+
+/** Fields shown (in order) in the merge preview dialog, with display labels. */
+export const MERGE_FIELDS: { key: keyof Contact; label: string }[] = [
+  { key: 'first_name', label: 'First Name' },
+  { key: 'last_name', label: 'Last Name' },
+  { key: 'company', label: 'Company' },
+  { key: 'title', label: 'Title' },
+  { key: 'email_1', label: 'Email 1' },
+  { key: 'email_2', label: 'Email 2' },
+  { key: 'phone_mobile', label: 'Mobile' },
+  { key: 'phone_work', label: 'Phone Work' },
+  { key: 'phone_home', label: 'Phone Home' },
+  { key: 'address_street', label: 'Street' },
+  { key: 'address_city', label: 'City' },
+  { key: 'address_state', label: 'State' },
+  { key: 'address_zip', label: 'ZIP' },
+  { key: 'address_country', label: 'Country' },
+  { key: 'linkedin_url', label: 'LinkedIn' },
+  { key: 'website', label: 'Website' },
+  { key: 'notes', label: 'Notes' },
+  { key: 'tags', label: 'Tags' },
+  { key: 'title_prefix', label: 'Prefix' },
+  { key: 'suffix', label: 'Suffix' },
+  { key: 'department', label: 'Department' },
+  { key: 'home_street', label: 'Home Street' },
+  { key: 'home_city', label: 'Home City' },
+  { key: 'home_state', label: 'Home State' },
+  { key: 'home_zip', label: 'Home ZIP' },
+  { key: 'home_country', label: 'Home Country' },
+  { key: 'birthday', label: 'Birthday' },
+  { key: 'anniversary', label: 'Anniversary' },
+  { key: 'spouse', label: 'Spouse' },
+  { key: 'children', label: 'Children' },
+  { key: 'hobby', label: 'Hobby' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'assistant_name', label: 'Assistant' },
+  { key: 'user_1', label: 'Custom 1' },
+  { key: 'user_2', label: 'Custom 2' },
+  { key: 'user_3', label: 'Custom 3' },
+  { key: 'user_4', label: 'Custom 4' }
 ];
 
 export function emptyContact(): Contact {

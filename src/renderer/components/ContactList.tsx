@@ -9,6 +9,10 @@ interface ContactListProps {
   onSelect: (id: number) => void;
   sortKey: SortKey;
   onSortChange: (key: SortKey) => void;
+  /** Ids highlighted as part of a 2-contact merge selection. */
+  multiSelectedIds?: number[];
+  /** Ctrl/Cmd+click handler used to build a merge selection. */
+  onCtrlSelect?: (id: number) => void;
 }
 
 const SORTS: { key: SortKey; label: string }[] = [
@@ -23,8 +27,11 @@ export function ContactList({
   selectedId,
   onSelect,
   sortKey,
-  onSortChange
+  onSortChange,
+  multiSelectedIds = [],
+  onCtrlSelect
 }: ContactListProps): JSX.Element {
+  const multi = new Set(multiSelectedIds);
   return (
     <div className="list-panel">
       <div className="list-header">
@@ -43,8 +50,13 @@ export function ContactList({
       {contacts.map((c) => (
         <div
           key={c.id}
-          className={`contact-row ${selectedId === c.id ? 'selected' : ''}`}
-          onClick={() => onSelect(c.id!)}
+          className={`contact-row ${selectedId === c.id ? 'selected' : ''} ${
+            multi.has(c.id!) ? 'multi-selected' : ''
+          }`}
+          onClick={(e) => {
+            if ((e.ctrlKey || e.metaKey) && onCtrlSelect) onCtrlSelect(c.id!);
+            else onSelect(c.id!);
+          }}
         >
           {c.favorite ? <span className="star">★</span> : null}
           <div className="name">

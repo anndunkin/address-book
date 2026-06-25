@@ -5,6 +5,8 @@ import {
   NewContact,
   AppSettings,
   DuplicateStrategy,
+  DuplicateGroup,
+  MergeHistoryEntry,
   ImportFormat,
   ImportSummary,
   ParsedImport,
@@ -31,6 +33,19 @@ const api = {
     ipcRenderer.invoke(IPC.CONTACT_DELETE, id),
   toggleFavorite: (id: number): Promise<Contact> =>
     ipcRenderer.invoke(IPC.CONTACT_TOGGLE_FAVORITE, id),
+
+  findDuplicates: (): Promise<DuplicateGroup[]> =>
+    ipcRenderer.invoke(IPC.CONTACTS_FIND_DUPLICATES),
+  mergeContacts: (
+    primaryId: number,
+    secondaryId: number,
+    mergedData: NewContact
+  ): Promise<Contact> =>
+    ipcRenderer.invoke(IPC.CONTACT_MERGE, primaryId, secondaryId, mergedData),
+  undoMerge: (mergeId: number): Promise<void> =>
+    ipcRenderer.invoke(IPC.CONTACT_UNDO_MERGE, mergeId),
+  getMergeHistory: (): Promise<MergeHistoryEntry[]> =>
+    ipcRenderer.invoke(IPC.MERGE_HISTORY),
 
   dbInfo: (): Promise<{ path: string | null; filename: string | null; count: number }> =>
     ipcRenderer.invoke(IPC.DB_INFO),

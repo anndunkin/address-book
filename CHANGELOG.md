@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.6] - 2026-06-24
+
+### Added
+- Merge Contacts feature:
+  - Edit → Find Duplicates: scans for high/medium/low confidence duplicate groups
+  - Merge Preview dialog: side-by-side field comparison with per-field selection, Smart Merge, Use All A/B
+  - "Merge with..." button on every contact detail panel
+  - Ctrl+Click two contacts in the list → "Merge Selected" toolbar button
+  - "Merge All High-Confidence" batch merge for obvious duplicates
+  - Merge history table with 10-second undo via toast notification
+  - Full test coverage for merge logic and UI components
+
 ## [1.0.5] - 2026-06-24
 
 ### Changed

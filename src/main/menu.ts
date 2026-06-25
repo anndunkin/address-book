@@ -45,6 +45,8 @@ export function buildMenu(win: BrowserWindow): Menu {
         { label: 'Delete Contact', accelerator: 'CmdOrCtrl+Backspace', click: () => send(win, 'delete-contact') },
         { type: 'separator' },
         { label: 'Find / Search', accelerator: 'CmdOrCtrl+F', click: () => send(win, 'find') },
+        { label: 'Find Duplicates…', accelerator: 'CmdOrCtrl+D', click: () => send(win, 'find-duplicates') },
+        { label: 'Merge History…', click: () => send(win, 'merge-history') },
         { type: 'separator' },
         { role: 'cut' },
         { role: 'copy' },

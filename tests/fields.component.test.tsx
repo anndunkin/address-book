@@ -28,6 +28,7 @@ describe('ContactDetail extended fields', () => {
         onDelete={() => {}}
         onToggleFavorite={() => {}}
         onLinkedInUpdate={() => {}}
+        onMergeWith={() => {}}
       />
     );
     expect(screen.getByText('Personal')).toBeInTheDocument();
@@ -49,6 +50,7 @@ describe('ContactDetail extended fields', () => {
         onDelete={() => {}}
         onToggleFavorite={() => {}}
         onLinkedInUpdate={() => {}}
+        onMergeWith={() => {}}
       />
     );
     expect(screen.queryByText('Personal')).not.toBeInTheDocument();

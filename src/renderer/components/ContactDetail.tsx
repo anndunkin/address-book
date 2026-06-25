@@ -7,6 +7,7 @@ interface ContactDetailProps {
   onDelete: () => void;
   onToggleFavorite: () => void;
   onLinkedInUpdate: () => void;
+  onMergeWith: () => void;
 }
 
 function Row({ label, value }: { label: string; value?: string }): JSX.Element | null {
@@ -24,7 +25,8 @@ export function ContactDetail({
   onEdit,
   onDelete,
   onToggleFavorite,
-  onLinkedInUpdate
+  onLinkedInUpdate,
+  onMergeWith
 }: ContactDetailProps): JSX.Element {
   if (!contact) {
     return <div className="detail-panel"><div className="empty">Select a contact to view details</div></div>;
@@ -63,6 +65,7 @@ export function ContactDetail({
           {contact.favorite ? '★ Favorite' : '☆ Favorite'}
         </button>
         <button onClick={onEdit}>Edit</button>
+        <button onClick={onMergeWith}>Merge with…</button>
         <button className="danger" onClick={onDelete}>
           Delete
         </button>

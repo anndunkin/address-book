@@ -66,6 +66,7 @@ describe('ContactDetail component', () => {
         onDelete={() => {}}
         onToggleFavorite={() => {}}
         onLinkedInUpdate={() => {}}
+        onMergeWith={() => {}}
       />
     );
     expect(screen.getByText(/Select a contact/i)).toBeInTheDocument();
@@ -88,6 +89,7 @@ describe('ContactDetail component', () => {
         onDelete={() => {}}
         onToggleFavorite={() => {}}
         onLinkedInUpdate={() => {}}
+        onMergeWith={() => {}}
       />
     );
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();

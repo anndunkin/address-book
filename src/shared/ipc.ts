@@ -6,6 +6,11 @@ export const IPC = {
   CONTACT_UPDATE: 'contact:update',
   CONTACT_DELETE: 'contact:delete',
   CONTACT_TOGGLE_FAVORITE: 'contact:toggleFavorite',
+  // merge
+  CONTACTS_FIND_DUPLICATES: 'contacts:findDuplicates',
+  CONTACT_MERGE: 'contacts:merge',
+  CONTACT_UNDO_MERGE: 'contacts:undoMerge',
+  MERGE_HISTORY: 'contacts:getMergeHistory',
   // database
   DB_INFO: 'db:info',
   DB_NEW: 'db:new',
@@ -57,4 +62,6 @@ export type MenuEvent =
   | 'linkedin-update-all'
   | 'linkedin-connect'
   | 'settings'
+  | 'find-duplicates'
+  | 'merge-history'
   | 'about';

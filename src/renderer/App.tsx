@@ -4,8 +4,11 @@ import {
   Contact,
   ImportSummary,
   NewContact,
-  FieldMapping
+  FieldMapping,
+  DuplicateGroup,
+  MergeHistoryEntry
 } from '../shared/types';
+import { smartMergeData, filledFieldCount } from '../shared/merge';
 import { MenuEvent } from '../shared/ipc';
 import { PickedImport } from '../main/preload';
 import { SearchBar } from './components/SearchBar';
@@ -15,13 +18,17 @@ import { ContactForm } from './components/ContactForm';
 import { ImportDialog } from './components/ImportDialog';
 import { FieldMapper } from './components/FieldMapper';
 import { SettingsDialog } from './components/SettingsDialog';
+import { MergeDialog } from './components/MergeDialog';
+import { DuplicateFinder } from './components/DuplicateFinder';
+import { MergeSearchDialog } from './components/MergeSearchDialog';
+import { MergeHistoryDialog } from './components/MergeHistoryDialog';
 import { Modal } from './components/Modal';
 
 type FilterMode = 'all' | 'favorites' | 'tags';
 
 export function App(): JSX.Element {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterMode>('all');
   const [tagFilter, setTagFilter] = useState<string | null>(null);
@@ -41,7 +48,26 @@ export function App(): JSX.Element {
   const [message, setMessage] = useState<{ title: string; body: string } | null>(null);
   const [seeding, setSeeding] = useState<{ total: number } | null>(null);
 
+  const [mergePair, setMergePair] = useState<{ a: Contact; b: Contact } | null>(null);
+  const [duplicateGroups, setDuplicateGroups] = useState<DuplicateGroup[] | null>(null);
+  const [mergeSearchFor, setMergeSearchFor] = useState<Contact | null>(null);
+  const [mergeHistory, setMergeHistory] = useState<MergeHistoryEntry[] | null>(null);
+  const [toast, setToast] = useState<{ message: string; mergeId: number | null } | null>(null);
+
   const searchRef = useRef<HTMLInputElement>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const selectedId = selectedIds.length ? selectedIds[selectedIds.length - 1] : null;
+  const selectOne = useCallback((id: number | null) => {
+    setSelectedIds(id == null ? [] : [id]);
+  }, []);
+  const toggleMulti = useCallback((id: number) => {
+    setSelectedIds((cur) => {
+      if (cur.includes(id)) return cur.filter((x) => x !== id);
+      const next = [...cur, id];
+      return next.length > 2 ? next.slice(next.length - 2) : next;
+    });
+  }, []);
 
   const refresh = useCallback(async () => {
     const [list, info] = await Promise.all([
@@ -169,6 +195,58 @@ export function App(): JSX.Element {
     void refresh();
   }, [refresh]);
 
+  const showToast = useCallback((msg: string, mergeId: number | null) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ message: msg, mergeId });
+    toastTimer.current = setTimeout(() => setToast(null), 10000);
+  }, []);
+
+  const doMerge = useCallback(
+    async (primaryId: number, secondaryId: number, mergedData: NewContact) => {
+      await window.addressBook.mergeContacts(primaryId, secondaryId, mergedData);
+      const history = await window.addressBook.getMergeHistory();
+      setMergePair(null);
+      setSelectedIds([primaryId]);
+      await refresh();
+      showToast('Contacts merged successfully', history[0]?.id ?? null);
+    },
+    [refresh, showToast]
+  );
+
+  const handleUndoMerge = useCallback(
+    async (mergeId: number) => {
+      await window.addressBook.undoMerge(mergeId);
+      setToast(null);
+      if (mergeHistory) setMergeHistory(await window.addressBook.getMergeHistory());
+      await refresh();
+    },
+    [refresh, mergeHistory]
+  );
+
+  const mergeAllHigh = useCallback(async () => {
+    if (!duplicateGroups) return;
+    let count = 0;
+    for (const group of duplicateGroups.filter((g) => g.confidence === 'high')) {
+      // Collapse the whole group into one record by merging the rest into the
+      // most-complete contact (more filled fields = primary).
+      let primary = [...group.contacts].sort(
+        (a, b) => filledFieldCount(b) - filledFieldCount(a)
+      )[0];
+      for (const other of group.contacts) {
+        if (!other.id || other.id === primary.id) continue;
+        primary = await window.addressBook.mergeContacts(
+          primary.id!,
+          other.id,
+          smartMergeData(primary, other)
+        );
+        count++;
+      }
+    }
+    setDuplicateGroups(null);
+    await refresh();
+    showToast(`Merged ${count} high-confidence duplicate pair(s)`, null);
+  }, [duplicateGroups, refresh, showToast]);
+
   const handleMenu = useCallback(
     async (event: MenuEvent) => {
       switch (event) {
@@ -185,7 +263,7 @@ export function App(): JSX.Element {
         case 'delete-contact':
           if (selectedId && confirm('Delete this contact?')) {
             await window.addressBook.deleteContact(selectedId);
-            setSelectedId(null);
+            selectOne(null);
             void refresh();
           }
           break;
@@ -251,6 +329,12 @@ export function App(): JSX.Element {
         case 'settings':
           setShowSettings(true);
           break;
+        case 'find-duplicates':
+          setDuplicateGroups(await window.addressBook.findDuplicates());
+          break;
+        case 'merge-history':
+          setMergeHistory(await window.addressBook.getMergeHistory());
+          break;
         case 'about':
           notify(
             'About Address Book',
@@ -259,7 +343,7 @@ export function App(): JSX.Element {
           break;
       }
     },
-    [selected, selectedId, refresh, handleImportPick, handleExport, handleLinkedInOne, handleLinkedInAll]
+    [selected, selectedId, selectOne, refresh, handleImportPick, handleExport, handleLinkedInOne, handleLinkedInAll]
   );
 
   useEffect(() => {
@@ -284,7 +368,7 @@ export function App(): JSX.Element {
       await window.addressBook.updateContact(editing.id, data);
     } else {
       const created = await window.addressBook.createContact(data);
-      setSelectedId(created.id ?? null);
+      selectOne(created.id ?? null);
     }
     setShowForm(false);
     setEditing(null);
@@ -313,6 +397,18 @@ export function App(): JSX.Element {
         >
           + Add Contact
         </button>
+        {selectedIds.length === 2 && (
+          <button
+            className="primary"
+            onClick={() => {
+              const a = contacts.find((c) => c.id === selectedIds[0]);
+              const b = contacts.find((c) => c.id === selectedIds[1]);
+              if (a && b) setMergePair({ a, b });
+            }}
+          >
+            Merge Selected
+          </button>
+        )}
         <div className="spacer" />
         <span style={{ color: 'var(--muted)' }}>
           {dbInfo.filename ? `${dbInfo.filename} · ` : ''}
@@ -355,9 +451,11 @@ export function App(): JSX.Element {
         <ContactList
           contacts={visible}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={selectOne}
           sortKey={sortKey}
           onSortChange={setSortKey}
+          multiSelectedIds={selectedIds.length === 2 ? selectedIds : []}
+          onCtrlSelect={toggleMulti}
         />
         <ContactDetail
           contact={selected}
@@ -368,7 +466,7 @@ export function App(): JSX.Element {
           onDelete={async () => {
             if (selected?.id && confirm('Delete this contact?')) {
               await window.addressBook.deleteContact(selected.id);
-              setSelectedId(null);
+              selectOne(null);
               void refresh();
             }
           }}
@@ -379,6 +477,9 @@ export function App(): JSX.Element {
             }
           }}
           onLinkedInUpdate={handleLinkedInOne}
+          onMergeWith={() => {
+            if (selected) setMergeSearchFor(selected);
+          }}
         />
       </div>
 
@@ -441,6 +542,58 @@ export function App(): JSX.Element {
           }}
           onCancel={() => setShowSettings(false)}
         />
+      )}
+
+      {mergePair && (
+        <MergeDialog
+          contactA={mergePair.a}
+          contactB={mergePair.b}
+          onMerge={doMerge}
+          onCancel={() => setMergePair(null)}
+        />
+      )}
+
+      {duplicateGroups && (
+        <DuplicateFinder
+          groups={duplicateGroups}
+          onReview={(group) => {
+            if (group.contacts.length >= 2) {
+              setMergePair({ a: group.contacts[0], b: group.contacts[1] });
+              setDuplicateGroups(null);
+            }
+          }}
+          onMergeAllHigh={mergeAllHigh}
+          onClose={() => setDuplicateGroups(null)}
+        />
+      )}
+
+      {mergeSearchFor && (
+        <MergeSearchDialog
+          source={mergeSearchFor}
+          candidates={contacts}
+          onPick={(contact) => {
+            setMergePair({ a: mergeSearchFor, b: contact });
+            setMergeSearchFor(null);
+          }}
+          onCancel={() => setMergeSearchFor(null)}
+        />
+      )}
+
+      {mergeHistory && (
+        <MergeHistoryDialog
+          entries={mergeHistory}
+          onUndo={handleUndoMerge}
+          onClose={() => setMergeHistory(null)}
+        />
+      )}
+
+      {toast && (
+        <div className="toast" role="status">
+          <span>{toast.message}</span>
+          {toast.mergeId != null && (
+            <button onClick={() => void handleUndoMerge(toast.mergeId!)}>Undo</button>
+          )}
+        </div>
       )}
 
       {message && (
